@@ -64,11 +64,9 @@ while True:
     elif pd_output > 0:
         robot.set_speed(pwm_speed)
         robot.move_left()
-        robot.last_move = "left"
     elif pd_output < 0:
         robot.set_speed(pwm_speed)
         robot.move_right()
-        robot.last_move = "right"
 
     cv2.imshow("Robot View", vis)
     if cv2.waitKey(1) & 0xFF == ord("q"):
