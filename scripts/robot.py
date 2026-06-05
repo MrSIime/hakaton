@@ -1,5 +1,6 @@
 from __future__ import annotations
 import threading
+import time
 
 from websocket import create_connection
 import cv2
@@ -8,23 +9,30 @@ import cv2
 class RobotControls:
     def __init__(self, wsip: str = "ws://10.1.66.69/ws",
                  streamcapip: str = "http://10.1.66.69:81/stream",
-                 default_speed: int = 170,
+                 default_speed_forward: int = 170,
+                 default_speed_backward: int = 120,
                  deadzone: int = 10,
+                 lag_threshold: float = 0.1,
                  led: str = "off") -> None:
-        self.default_speed = default_speed
-        self.speed = default_speed
+        self.default_speed_forward = default_speed_forward
+        self.default_speed_backward = default_speed_backward
+        self.speed = default_speed_forward
         self.deadzone = deadzone
+        self.lag_threshold = lag_threshold
         self.led = led
+        self.last_move: str = "right"
         self.ws = create_connection(wsip)
         self.streamcapip = streamcapip
         self.set_led(led)
-        self.set_speed(default_speed)
+        self.set_speed(default_speed_forward)
         self.streamcap_start()
 
     def streamcap_loop(self) -> None:
         self.streamcap = cv2.VideoCapture(self.streamcapip)
         while not self._stop_event.is_set():
             ret, frame = self.streamcap.read()
+            if ret:
+                self.last_frame_time = time.perf_counter()
             with self._frame_lock:
                 self.streamframe = (ret, frame)
         self.streamcap.release()
@@ -33,6 +41,7 @@ class RobotControls:
         self._stop_event = threading.Event()
         self._frame_lock = threading.Lock()
         self.streamframe = (False, None)
+        self.last_frame_time = time.perf_counter()
         self.thread = threading.Thread(target=self.streamcap_loop, daemon=True)
         self.thread.start()
 
