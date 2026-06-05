@@ -7,9 +7,9 @@ from scripts.robot import RobotControls
 from scripts.black_line_center_detection import BlackLineCenterDetector
 from scripts.pd_regulator import PDRegulator
 
-robot = RobotControls(default_speed_forward=120, default_speed_backward=100,
-                      deadzone=25, lag_threshold=0.1, led="off")
-pd_regulator = PDRegulator(kp=1.0, kd=0.35, max_output=170)
+robot = RobotControls(default_speed_forward=120, default_speed_backward=120,
+                      deadzone=20, lag_threshold=0.1, led="off")
+pd_regulator = PDRegulator(kp=1.0, kd=0.3, max_output=170)
 detector = BlackLineCenterDetector(
     black_threshold=100, box=(40, 120, 280, 240)
 )
@@ -29,8 +29,6 @@ while True:
 
     if time.perf_counter() - robot.last_frame_time > robot.lag_threshold:
         print("LAG!!!!!!!!!!!!!!!!")
-        if robot.led != "off":
-            robot.set_led("off")
         robot.move_stop()
         time_last = time.perf_counter()
         last_error = 0
@@ -38,8 +36,6 @@ while True:
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
         continue
-    if robot.led == "off":
-        robot.set_led("on")
 
     if center is None:
         print("No line detected")
@@ -58,7 +54,7 @@ while True:
     time_last = time_now
 
     pd_output = pd_regulator.compute(error, last_error, dtime)
-    pwm_speed = pd_regulator.output_to_pwm(pd_output, pwm_min=85, pwm_max=255)
+    pwm_speed = pd_regulator.output_to_pwm(pd_output, pwm_min=140, pwm_max=180)
 
     last_error = error
 
