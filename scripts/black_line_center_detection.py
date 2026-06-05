@@ -9,9 +9,11 @@ class BlackLineCenterDetector:
     def __init__(self, box: tuple[int, int, int, int] = (0, 200, 320, 240),
                  black_threshold: int = 50) -> None:
         self.box = box
+        self.center_x = (box[2] - box[0]) // 2
         self.black_threshold = black_threshold
 
-    def analyze(self, frame: np.ndarray) -> tuple[tuple[int, int], np.ndarray]:
+    def analyze(self, frame: np.ndarray
+                ) -> tuple[tuple[int, int] | None, np.ndarray]:
         x1, y1, x2, y2 = self.box
         roi = frame[y1:y2, x1:x2]
         hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
@@ -24,7 +26,7 @@ class BlackLineCenterDetector:
 
         M = cv2.moments(mask)
         if M["m00"] == 0:
-            return (0, 0), vis
+            return None, vis
         cx = int(M["m10"] / M["m00"])
         cy = int(M["m01"] / M["m00"])
         cv2.circle(vis, (cx, cy), 5, (0, 0, 255), -1)

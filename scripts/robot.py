@@ -8,23 +8,30 @@ import cv2
 class RobotControls:
     def __init__(self, wsip: str = "ws://10.1.66.69/ws",
                  streamcapip: str = "http://10.1.66.69:81/stream",
-                 speed: int = 170, led: str = "off") -> None:
-        self.speed = speed
+                 default_speed: int = 170,
+                 deadzone: int = 10,
+                 led: str = "off") -> None:
+        self.default_speed = default_speed
+        self.speed = default_speed
+        self.deadzone = deadzone
         self.led = led
         self.ws = create_connection(wsip)
         self.streamcapip = streamcapip
         self.set_led(led)
-        self.set_speed(speed)
+        self.set_speed(default_speed)
         self.streamcap_start()
 
     def streamcap_loop(self) -> None:
         self.streamcap = cv2.VideoCapture(self.streamcapip)
         while not self._stop_event.is_set():
-            self.streamframe = self.streamcap.read()
+            ret, frame = self.streamcap.read()
+            with self._frame_lock:
+                self.streamframe = (ret, frame)
         self.streamcap.release()
 
     def streamcap_start(self) -> None:
         self._stop_event = threading.Event()
+        self._frame_lock = threading.Lock()
         self.streamframe = (False, None)
         self.thread = threading.Thread(target=self.streamcap_loop, daemon=True)
         self.thread.start()
