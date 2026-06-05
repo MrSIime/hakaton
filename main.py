@@ -11,7 +11,7 @@ robot = RobotControls(default_speed_forward=120, default_speed_backward=100,
                       deadzone=25, lag_threshold=0.1, led="off")
 pd_regulator = PDRegulator(kp=1.0, kd=0.35, max_output=170)
 detector = BlackLineCenterDetector(
-    black_threshold=70, box=(40, 120, 280, 240)
+    black_threshold=100, box=(40, 120, 280, 240)
 )
 
 last_error = 0
@@ -29,7 +29,8 @@ while True:
 
     if time.perf_counter() - robot.last_frame_time > robot.lag_threshold:
         print("LAG!!!!!!!!!!!!!!!!")
-        robot.set_led("off")
+        if robot.led != "off":
+            robot.set_led("off")
         robot.move_stop()
         time_last = time.perf_counter()
         last_error = 0
@@ -37,7 +38,8 @@ while True:
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
         continue
-    robot.set_led("on")
+    if robot.led == "off":
+        robot.set_led("on")
 
     if center is None:
         print("No line detected")

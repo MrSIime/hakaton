@@ -20,7 +20,6 @@ class RobotControls:
         self.deadzone = deadzone
         self.lag_threshold = lag_threshold
         self.led = led
-        self.last_move: str = "right"
         self.ws = create_connection(wsip)
         self.streamcapip = streamcapip
         self.set_led(led)
