@@ -22,6 +22,11 @@ class RobotControls:
         self.led = led
         self.ws = create_connection(wsip)
         self.streamcapip = streamcapip
+        self._stop_event = threading.Event()
+        self._frame_lock = threading.Lock()
+        self.streamframe = (False, None)
+        self.last_frame_time = time.perf_counter()
+        self.thread = None
         self.set_led(led)
         self.set_speed(default_speed_forward)
         self.streamcap_start()
@@ -37,16 +42,22 @@ class RobotControls:
         self.streamcap.release()
 
     def streamcap_start(self) -> None:
-        self._stop_event = threading.Event()
-        self._frame_lock = threading.Lock()
-        self.streamframe = (False, None)
-        self.last_frame_time = time.perf_counter()
+        self._stop_event.clear()
         self.thread = threading.Thread(target=self.streamcap_loop, daemon=True)
         self.thread.start()
 
     def streamcap_stop(self) -> None:
         self._stop_event.set()
-        self.thread.join()
+        if self.thread is not None:
+            self.thread.join()
+            self.thread = None
+
+    def close(self) -> None:
+        self.streamcap_stop()
+        try:
+            self.ws.close()
+        except Exception:
+            pass
 
     def set_speed(self, speed: int) -> None:
         self.speed = speed

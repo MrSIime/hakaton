@@ -8,8 +8,8 @@ from scripts.black_line_center_detection import BlackLineCenterDetector
 from scripts.pd_regulator import PDRegulator
 
 robot = RobotControls(default_speed_forward=120, default_speed_backward=120,
-                      deadzone=20, lag_threshold=0.1, led="off")
-pd_regulator = PDRegulator(kp=1.0, kd=0.3, max_output=170)
+                      deadzone=35, lag_threshold=0.1, led="off")
+pd_regulator = PDRegulator(kp=0.5, kd=1.2, max_output=170)
 detector = BlackLineCenterDetector(
     black_threshold=100, box=(40, 120, 280, 240)
 )
@@ -72,5 +72,5 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
-robot.streamcap_stop()
+robot.close()
 cv2.destroyAllWindows()
