@@ -9,16 +9,16 @@ from scripts.pd_regulator import PDRegulator
 from scripts.line_recovery import LineRecovery
 
 
-KP = 1.4
-KD = 0.8
-PD_MAX_OUTPUT = 224
+KP = 0.8
+KD = 0.35
+PD_MAX_OUTPUT = 128
 
-SPEED_FORWARD_DEFAULT = 200   # Базова швидкість вперед
+SPEED_FORWARD_DEFAULT = 255   # Базова швидкість вперед
 SPEED_FORWARD_BOOST   = 255   # Швидкість на прямих ділянках
 SPEED_TURN_MIN        = 100   # Мінімальний PWM при повороті
-SPEED_TURN_MAX        = 220   # Максимальний PWM при повороті
+SPEED_TURN_MAX        = 255   # Максимальний PWM при повороті
 
-BLACK_THRESHOLD = 70          # Поріг яскравості для чорного (0-255)
+BLACK_THRESHOLD = 50          # Поріг яскравості для чорного (0-255)
 ROI_BOX = (0, 120, 320, 240)  # Область аналізу: (x1, y1, x2, y2)
 
 DEADZONE      = 50            # Піксельна зона "прямо" (±px від центру)
@@ -27,9 +27,9 @@ LAG_THRESHOLD = 0.05          # Секунди — якщо кадр старш�
 STRAIGHT_FRAMES_NEEDED   = 8  # Кадрів підряд з малою похибкою
 STRAIGHT_ERROR_THRESHOLD = 20 # Пікселі — що вважається "прямо"
 
-RECOVERY_SOFT_TURN_SPEED = 160  # PWM м'якого пошукового повороту
+RECOVERY_SOFT_TURN_SPEED = 150  # PWM м'якого пошукового повороту
 RECOVERY_SOFT_FRAMES     = 20   # Кадрів у м'якій фазі, потім — крутіше
-RECOVERY_HARD_TURN_SPEED = 220  # PWM крутого пошукового повороту
+RECOVERY_HARD_TURN_SPEED = 100  # PWM крутого пошукового повороту
 
 
 robot = RobotControls(
@@ -51,6 +51,8 @@ recovery = LineRecovery(
 last_error       = 0
 time_last        = time.perf_counter()
 straight_counter = 0
+
+input()
 
 while True:
     with robot._frame_lock:
