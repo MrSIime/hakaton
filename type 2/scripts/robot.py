@@ -8,8 +8,8 @@ import cv2
 
 
 class RobotControls:
-    def __init__(self, wsip: str = "ws://10.1.66.69/ws",
-                 streamcapip: str = "http://10.1.66.69:81/stream",
+    def __init__(self, wsip: str = "ws://10.187.18.26/ws",
+                 streamcapip: str = "http://10.187.18.26:81/stream",
                  default_speed_forward: int = 170,
                  default_speed_backward: int = 120,
                  deadzone: int = 10,
