@@ -8,8 +8,8 @@ from scripts.black_line_center_detection import BlackLineCenterDetector
 from scripts.pd_regulator import PDRegulator
 
 robot = RobotControls(default_speed_forward=255, default_speed_backward=100,
-                      deadzone=50, lag_threshold=0.05, led="off")
-pd_regulator = PDRegulator(kp=1.4, kd=0.8, max_output=224)
+                      deadzone=50, lag_threshold=0.035, led="off")
+pd_regulator = PDRegulator(kp=0.8, kd=0.35, max_output=128)
 detector = BlackLineCenterDetector(
     black_threshold=70, box=(0, 120, 320, 240)
 )
@@ -60,6 +60,7 @@ while True:
     last_error = error
 
     if abs(error) < robot.deadzone:
+        robot.move_forward()
         robot.set_speed(robot.default_speed_forward)
         robot.move_forward()
     elif pd_output > 0:
