@@ -1,6 +1,7 @@
 from __future__ import annotations
 import threading
 import time
+import json
 
 from websocket import create_connection
 import cv2
@@ -60,6 +61,8 @@ class RobotControls:
             pass
 
     def set_speed(self, speed: int) -> None:
+        if speed == self.speed:
+            return
         self.speed = speed
         self.ws.send(f"speed:{self.speed}")
 
@@ -81,3 +84,15 @@ class RobotControls:
 
     def move_left(self) -> None:
         self.ws.send("left")
+
+    def status(self) -> dict | None:
+        self.ws.send("status")
+        response = self.ws.recv()
+        if not response:
+            return None
+        try:
+            response_json = json.loads(response)
+            return response_json
+        except json.JSONDecodeError as e:
+            print(f"status: invalid JSON response: {e!r} (raw={response!r})")
+            return None

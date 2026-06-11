@@ -16,7 +16,6 @@ class PDRegulator:
 
         d_term = self.kd * (error - last_error) / dtime if dtime != 0 else 0.0
 
-        print(p_term, d_term, p_term + d_term)
         return p_term + d_term
 
     def output_to_pwm(self, pd_output: float,

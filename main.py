@@ -7,11 +7,11 @@ from scripts.robot import RobotControls
 from scripts.black_line_center_detection import BlackLineCenterDetector
 from scripts.pd_regulator import PDRegulator
 
-robot = RobotControls(default_speed_forward=120, default_speed_backward=120,
-                      deadzone=35, lag_threshold=0.1, led="off")
-pd_regulator = PDRegulator(kp=0.5, kd=1.2, max_output=170)
+robot = RobotControls(default_speed_forward=255, default_speed_backward=100,
+                      deadzone=50, lag_threshold=0.05, led="off")
+pd_regulator = PDRegulator(kp=1.4, kd=0.8, max_output=224)
 detector = BlackLineCenterDetector(
-    black_threshold=100, box=(40, 120, 280, 240)
+    black_threshold=70, box=(0, 120, 320, 240)
 )
 
 last_error = 0
@@ -38,9 +38,10 @@ while True:
         continue
 
     if center is None:
-        print("No line detected")
         robot.set_speed(robot.default_speed_backward)
         robot.move_backward()
+        # robot.move_stop()
+        detector.draw_center_line_deadzone(vis, robot.deadzone)
         cv2.imshow("Robot View", vis)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
@@ -54,7 +55,7 @@ while True:
     time_last = time_now
 
     pd_output = pd_regulator.compute(error, last_error, dtime)
-    pwm_speed = pd_regulator.output_to_pwm(pd_output, pwm_min=140, pwm_max=180)
+    pwm_speed = pd_regulator.output_to_pwm(pd_output, pwm_min=100, pwm_max=255)
 
     last_error = error
 
@@ -68,6 +69,7 @@ while True:
         robot.set_speed(pwm_speed)
         robot.move_right()
 
+    detector.draw_center_line_deadzone(vis, robot.deadzone)
     cv2.imshow("Robot View", vis)
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
